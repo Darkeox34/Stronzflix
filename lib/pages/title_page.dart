@@ -391,7 +391,6 @@ class _TitlePageState extends State<TitlePage> {
                 (season) => season.seasonNo == seasonNo,
                 orElse: () => title.seasons.first
             );
-            this._selectedSeason = title.seasons.first;
         }
     }
 
