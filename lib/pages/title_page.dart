@@ -384,8 +384,15 @@ class _TitlePageState extends State<TitlePage> {
     Future<void> _fetchTitle() async {
         Title title = await this._metadata.site.getTitle(this._metadata);
         this._title = title;
-        if(title is Series && title.seasons.isNotEmpty)
+        if(title is Series && title.seasons.isNotEmpty) {
+            Watchable? episode = await KeepWatching.getWatchable(this._metadata, title: this._title);
+            int? seasonNo = (episode as Episode?)?.season.seasonNo;
+            this._selectedSeason = title.seasons.firstWhere(
+                (season) => season.seasonNo == seasonNo,
+                orElse: () => title.seasons.first
+            );
             this._selectedSeason = title.seasons.first;
+        }
     }
 
     Future<void> _refetchLocal() async {

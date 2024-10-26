@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Title;
 import 'package:stronzflix/backend/api/media.dart';
 import 'package:stronzflix/backend/api/site.dart';
 import 'package:sutils/sutils.dart';
@@ -124,12 +124,13 @@ class KeepWatching extends LocalStorage {
         super.serialize();
     }
 
-    static Future<Watchable?> getWatchable(TitleMetadata metadata) async{
+    static Future<Watchable?> getWatchable(TitleMetadata metadata, {Title? title}) async{
         String id = metadata.site.name + metadata.uri.toString();
         if(KeepWatching.isWatched(metadata))
             return Watchable.unserialize(
                 KeepWatching.instance._keepWatching[id].metadata,
-                KeepWatching.instance._keepWatching[id].info
+                KeepWatching.instance._keepWatching[id].info,
+                title: title
             );
         
         return null;

@@ -90,8 +90,8 @@ mixin Watchable implements Playable {
         };
     }
 
-    static Future<Watchable> unserialize(TitleMetadata metadata, String info) async {
-        Title title = await metadata.site.getTitle(metadata);
+    static Future<Watchable> unserialize(TitleMetadata metadata, String info, {Title? title}) async {
+        title ??= await metadata.site.getTitle(metadata);
         if (title is Film)
             return title;
         else if (title is Series) {
