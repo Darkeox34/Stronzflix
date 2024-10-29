@@ -6,9 +6,9 @@ list(APPEND FLUTTER_PLUGIN_LIST
   bonsoir_windows
   connectivity_plus
   flutter_webrtc
-  fvp
-  screen_retriever
+  screen_retriever_windows
   url_launcher_windows
+  video_player_win
   window_manager
 )
 

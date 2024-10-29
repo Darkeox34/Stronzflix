@@ -40,7 +40,8 @@ dependencies:
   auto_size_text: ^3.0.0
   castscreen:
     git: https://github.com/Bonfra04/dart_castscreen.git
-  fvp: ^0.27.0
+  fvp:
+    git: https://github.com/Bonfra04/fvp.git
 
 dependency_overrides:
   uuid: ^4.4.0
