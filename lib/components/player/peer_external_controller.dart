@@ -21,7 +21,6 @@ class PeerExternalController extends StronzExternalController {
                 await SinkMessenger.play();
             else if(state.playing == false)
                     await SinkMessenger.pause();
-            print("Sending: ${state.playing ?? false ? "Play" : "Pause"}");
         }
     }
 
@@ -43,7 +42,6 @@ class PeerExternalController extends StronzExternalController {
     @override
     Future<void> initialize(Playable playable, Future<void> Function(StronzExternalControllerEvent event, {dynamic arg}) handler) async {
         this._subscription = SinkMessenger.messages.listen((message) {
-            print("Received message: ${message.type}");
             switch(message.type) {
                 case MessageType.play:
                     this._playing = true;
