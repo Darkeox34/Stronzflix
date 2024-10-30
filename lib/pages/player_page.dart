@@ -14,7 +14,12 @@ import 'package:stronzflix/components/player/peer_external_controller.dart';
 import 'package:sutils/sutils.dart';
 
 class PlayerPage extends StatefulWidget {
-    const PlayerPage({super.key});
+    final Watchable watchable;
+
+    const PlayerPage({
+        required this.watchable,    
+        super.key,
+    });
 
     @override
     State<PlayerPage> createState() => _PlayerPageState();
@@ -56,8 +61,6 @@ class _PlayerPageState extends State<PlayerPage> with StreamListener {
 
     @override
     Widget build(BuildContext context) {
-        Watchable watchable = ModalRoute.of(super.context)!.settings.arguments as Watchable;
-
         return PopScope(
             onPopInvokedWithResult: (didPop, result) {
                 SinkMessenger.stopWatching();
@@ -68,10 +71,10 @@ class _PlayerPageState extends State<PlayerPage> with StreamListener {
                 body: ListenableBuilder(
                     listenable: CastManager.state,
                     builder: (context, _) => StronzVideoPlayer(
-                        playable: watchable,
+                        playable: super.widget.watchable,
                         controllerState: StronzControllerState.autoPlay(
                             position: Duration(
-                                seconds: KeepWatching.getTimestamp(watchable) ?? 0
+                                seconds: KeepWatching.getTimestamp(super.widget.watchable) ?? 0
                             )
                         ),
                         onBeforeExit: (controller) {

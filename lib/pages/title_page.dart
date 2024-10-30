@@ -16,7 +16,14 @@ import 'package:stronzflix/dialogs/confirmation_dialog.dart';
 import 'package:stronzflix/dialogs/download_dialog.dart';
 
 class TitlePage extends StatefulWidget {
-    const TitlePage({super.key});
+    final String heroUuid;
+    final TitleMetadata metadata;
+    
+    const TitlePage({
+        required this.heroUuid,
+        required this.metadata,
+        super.key
+    });
 
     @override
     State<TitlePage> createState() => _TitlePageState();
@@ -36,8 +43,6 @@ class _TitlePageState extends State<TitlePage> {
 
     Title? _title;
     Title get title => this._title!;
-    late TitleMetadata _metadata;
-    late String _heroUuid;
     late Season _selectedSeason;
     bool _discarding = false;
     
@@ -55,25 +60,17 @@ class _TitlePageState extends State<TitlePage> {
         super.dispose();
     }
 
-    @override
-    void didChangeDependencies() {
-        super.didChangeDependencies();
-        List args = ModalRoute.of(super.context)!.settings.arguments as List;
-        this._heroUuid = args[0];
-        this._metadata = args[1];
-    }
-
     Widget _buildBanner(BuildContext context) {
         return ClipRRect(
             child: Stack(
                 children: [
                     Hero(
-                        tag: this._heroUuid,
+                        tag: super.widget.heroUuid,
                         child: Container(
                             decoration: BoxDecoration(
                                 image: DecorationImage(
                                     image: resourceImageProvider(
-                                        uri: this._metadata.poster
+                                        uri: super.widget.metadata.poster
                                     ),
                                     fit: BoxFit.cover,
                                 ),
@@ -126,9 +123,9 @@ class _TitlePageState extends State<TitlePage> {
             ),
             actions: [
                 const CastButton(),
-                if( this._metadata.site is! LocalSite) ...[
+                if(super.widget.metadata.site is! LocalSite) ...[
                     const SizedBox(width: 8),
-                    SaveTitleButton(title: this._metadata),
+                    SaveTitleButton(title: super.widget.metadata),
                     const SizedBox(width: 8)
                 ]
             ],
@@ -142,7 +139,7 @@ class _TitlePageState extends State<TitlePage> {
                     ],
                 ),
             ),
-            title: Text(this._metadata.name,
+            title: Text(super.widget.metadata.name,
                 style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold
@@ -155,7 +152,7 @@ class _TitlePageState extends State<TitlePage> {
         return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-                Text(this._metadata.name,
+                Text(super.widget.metadata.name,
                     style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold
@@ -382,10 +379,10 @@ class _TitlePageState extends State<TitlePage> {
     }
 
     Future<void> _fetchTitle() async {
-        Title title = await this._metadata.site.getTitle(this._metadata);
+        Title title = await super.widget.metadata.site.getTitle(super.widget.metadata);
         this._title = title;
         if(title is Series && title.seasons.isNotEmpty) {
-            Watchable? episode = await KeepWatching.getWatchable(this._metadata, title: this._title);
+            Watchable? episode = await KeepWatching.getWatchable(super.widget.metadata, title: this._title);
             int? seasonNo = (episode as Episode?)?.season.seasonNo;
             this._selectedSeason = title.seasons.firstWhere(
                 (season) => season.seasonNo == seasonNo,
@@ -399,7 +396,7 @@ class _TitlePageState extends State<TitlePage> {
             return;
 
         try {
-            Title updatedTitle = await LocalSite.instance.getTitle(this._metadata);
+            Title updatedTitle = await LocalSite.instance.getTitle(super.widget.metadata);
             
             if(updatedTitle is Series) {
                 this._selectedSeason = updatedTitle.seasons.firstWhere(

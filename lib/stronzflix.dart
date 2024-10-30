@@ -78,11 +78,23 @@ class Stronzflix extends StatelessWidget {
                 theme: Stronzflix.theme,
                 initialRoute: '/loading',
                 routes: {
-                    '/home' : (context) => const HomePage(),
                     '/loading': (context) => const LoadingPage(),
-                    '/title': (context) => const TitlePage(),
-                    '/player': (context) => const PlayerPage(),
-                    '/player-sink': (context) => const PlayerPage(),
+                    '/home' : (context) => const HomePage(),
+                },
+                onGenerateRoute: (settings) {
+                    return MaterialPageRoute(
+                        builder: (context) => switch(settings.name) {
+                            '/title' => TitlePage(
+                                heroUuid: (settings.arguments as List)[0],
+                                metadata: (settings.arguments as List)[1],
+                            ),
+                            '/player' || '/player-sink' => PlayerPage(
+                                watchable: settings.arguments as Watchable
+                            ),
+                            '/' => const SizedBox.shrink(),
+                            _ => throw Exception("Unknown route: ${settings.name}")
+                        }
+                    );
                 },
                 navigatorKey: Stronzflix.navigatorKey,
                 debugShowCheckedModeBanner: false,
