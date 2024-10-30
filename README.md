@@ -24,3 +24,4 @@ The developers of this application neither host nor distribute any of the conten
 TODOs:
 - [ ] Better sink implementation
 - [ ] Implement sink over bluetooth
+- [ ] PiP and miniplayer
