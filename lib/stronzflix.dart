@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:stronzflix/backend/api/media.dart';
 import 'package:stronzflix/backend/sink/sink_messenger.dart';
 import 'package:stronzflix/backend/storage/keep_watching.dart';
+import 'package:stronzflix/components/floating_player_context.dart';
 import 'package:stronzflix/pages/home_page.dart';
 import 'package:stronzflix/pages/loading_page.dart';
 import 'package:stronzflix/pages/player_page.dart';
@@ -96,6 +97,7 @@ class Stronzflix extends StatelessWidget {
                         }
                     );
                 },
+                builder: (context, child) => FloatingPlayerContext(child: child),
                 navigatorKey: Stronzflix.navigatorKey,
                 debugShowCheckedModeBanner: false,
                 navigatorObservers: [

@@ -10,6 +10,7 @@ import 'package:stronzflix/components/cast_button.dart';
 import 'package:stronzflix/components/player/cast_video_player_controller.dart';
 import 'package:stronzflix/components/player/cast_video_view.dart';
 import 'package:stronzflix/components/player/chat_button.dart';
+import 'package:stronzflix/components/player/floating_player_button.dart';
 import 'package:stronzflix/components/player/peer_external_controller.dart';
 import 'package:sutils/sutils.dart';
 
@@ -28,6 +29,9 @@ class PlayerPage extends StatefulWidget {
 class _PlayerPageState extends State<PlayerPage> with StreamListener {
     
     bool _exited = false;
+    bool _floatingPlayerVisible = false;
+
+    StronzPlayerController? _controller;
 
     @override
     void didChangeDependencies() {
@@ -55,6 +59,8 @@ class _PlayerPageState extends State<PlayerPage> with StreamListener {
 
     @override
     void dispose() {
+        if(!this._floatingPlayerVisible)
+            this._controller?.dispose();
         super.disposeSubscriptions();
         super.dispose();
     }
@@ -70,31 +76,49 @@ class _PlayerPageState extends State<PlayerPage> with StreamListener {
                 backgroundColor: Colors.black,
                 body: ListenableBuilder(
                     listenable: CastManager.state,
-                    builder: (context, _) => StronzVideoPlayer(
-                        playable: super.widget.watchable,
-                        controllerState: StronzControllerState.autoPlay(
-                            position: Duration(
-                                seconds: KeepWatching.getTimestamp(super.widget.watchable) ?? 0
-                            )
-                        ),
-                        onBeforeExit: (controller) {
-                            if(controller.duration.inSeconds != 0)
-                                KeepWatching.add(controller.playable as Watchable, controller.position.inSeconds, controller.duration.inSeconds);
-                        },
-                        additionalControlsBuilder: (context, onMenuOpened, onMenuClosed) => [
-                            CastButton(
-                                onOpened: onMenuOpened,
-                                onClosed: onMenuClosed,
+                    builder: (context, _) {
+                        if(CastManager.connected && this._controller is! CastVideoPlayerController)
+                            this._controller = CastVideoPlayerController([MediaSessionExternalController(), PeerExternalController()]);
+                        else if(!CastManager.connected && this._controller is! NativePlayerController)
+                            this._controller = NativePlayerController([MediaSessionExternalController(), PeerExternalController()]);
+
+                        return StronzVideoPlayer(
+                            playable: super.widget.watchable,
+                            controllerState: StronzControllerState.autoPlay(
+                                position: Duration(
+                                    seconds: KeepWatching.getTimestamp(super.widget.watchable) ?? 0
+                                )
                             ),
-                            const ChatButton(),
-                        ],
-                        videoBuilder: !CastManager.connected ? null : (context) => const SizedBox.expand(
-                            child: CastVideoView()
-                        ),
-                        controller: CastManager.connected
-                            ? CastVideoPlayerController([MediaSessionExternalController(), PeerExternalController()])
-                            : NativePlayerController([MediaSessionExternalController(), PeerExternalController()]),
-                    )
+                            onBeforeExit: (controller) {
+                                if(controller.duration.inSeconds != 0)
+                                    KeepWatching.add(controller.playable as Watchable, controller.position.inSeconds, controller.duration.inSeconds);
+                            },
+                            additionalControlsBuilder: (context, onMenuOpened, onMenuClosed) => [
+                                CastButton(
+                                    onOpened: onMenuOpened,
+                                    onClosed: onMenuClosed,
+                                ),
+                                const ChatButton(),
+                                FloatingPlayerButton(
+                                    onClose: () {
+                                        if(this._exited)
+                                            this._controller?.dispose();
+                                        this.setState(() => this._floatingPlayerVisible = false);
+                                    },
+                                    onOpen: () {
+                                        this.setState(() => this._floatingPlayerVisible = true);
+                                    },
+                                )
+                            ],
+                            videoBuilder:
+                                this._floatingPlayerVisible
+                                    ? (context) => const CastVideoView()
+                                : CastManager.connected
+                                    ? (context) => const CastVideoView()
+                                : null,
+                            controller: this._controller,
+                        );
+                    }
                 )
             )
         );
