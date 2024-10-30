@@ -39,6 +39,8 @@ class _CastVideoViewState extends State<CastVideoView> with StronzPlayerControl,
     @override
     Widget build(BuildContext context) {
         Uri uri = this._playable.thumbnail;
-        return ResourceImage(uri: uri, fit: BoxFit.contain);
+        return SizedBox.expand(
+            child: ResourceImage(uri: uri, fit: BoxFit.contain)
+        );
     }
 }
