@@ -101,20 +101,18 @@ class _PlayerPageState extends State<PlayerPage> with StreamListener {
                                 const ChatButton(),
                                 FloatingPlayerButton(
                                     onClose: () {
+                                        this._floatingPlayerVisible = false;
                                         if(this._exited)
                                             this._controller?.dispose();
-                                        this.setState(() => this._floatingPlayerVisible = false);
                                     },
                                     onOpen: () {
-                                        this.setState(() => this._floatingPlayerVisible = true);
+                                        this._floatingPlayerVisible = true;
+                                        Navigator.of(context).pop();
                                     },
                                 )
                             ],
-                            videoBuilder:
-                                this._floatingPlayerVisible
-                                    ? (context) => const CastVideoView()
-                                : CastManager.connected
-                                    ? (context) => const CastVideoView()
+                            videoBuilder:CastManager.connected
+                                ? (context) => const CastVideoView()
                                 : null,
                             controller: this._controller!,
                         );

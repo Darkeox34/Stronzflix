@@ -14,6 +14,21 @@ class FloatingPlayerContext extends StatefulWidget {
     static FloatingPlayerContextState of(BuildContext context) {
         return context.findAncestorStateOfType<FloatingPlayerContextState>()!;
     }
+
+    static Widget navigatorGuard(BuildContext context, {required Widget child}) {
+        if (FloatingPlayerContext.of(context).visible)
+            return AlertDialog(
+                title: const Text("Attenzione"),
+                content: const Text("Un video è già in riproduzione"),
+                actions: [
+                    TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text("Chiudi")
+                    )
+                ]
+            );
+        return child;
+    }
 }
 
 class FloatingPlayerContextState extends State<FloatingPlayerContext> {
@@ -22,7 +37,7 @@ class FloatingPlayerContextState extends State<FloatingPlayerContext> {
     Offset _initialPosition = const Offset(100.0, 100.0);
     Offset _dragOffset = Offset.zero;
 
-    Size _size = const Size(16 * 15, 9 * 15);
+    Size _size = const Size(16 * 20, 9 * 20);
     final Size _minSize = const Size(16 * 10, 9 * 10);
     final double _padding = 20.0;
 
@@ -33,6 +48,8 @@ class FloatingPlayerContextState extends State<FloatingPlayerContext> {
     Widget Function(BuildContext)? _buildContent;
     void Function()? _onClose;
     
+    bool get visible => this._visible;
+
     void show(Widget Function(BuildContext)? buildContent, {void Function()? onClose}) {
         super.setState(() {
             this._buildContent = buildContent;

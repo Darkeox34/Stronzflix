@@ -84,13 +84,16 @@ class Stronzflix extends StatelessWidget {
                 },
                 onGenerateRoute: (settings) {
                     return MaterialPageRoute(
+                        settings: settings,
                         builder: (context) => switch(settings.name) {
                             '/title' => TitlePage(
                                 heroUuid: (settings.arguments as List)[0],
                                 metadata: (settings.arguments as List)[1],
                             ),
-                            '/player' || '/player-sink' => PlayerPage(
-                                watchable: settings.arguments as Watchable
+                            '/player' || '/player-sink' => FloatingPlayerContext.navigatorGuard(context,
+                                child: PlayerPage(
+                                    watchable: settings.arguments as Watchable
+                                )
                             ),
                             '/' => const SizedBox.shrink(),
                             _ => throw Exception("Unknown route: ${settings.name}")
@@ -112,7 +115,6 @@ class SinkNavigatorObserver extends NavigatorObserver {
 
     @override
     void didPush(Route route, Route? previousRoute) {
-        super.didPush(route, previousRoute);
         if(route.settings.name == '/player') {
             Watchable watchable = route.settings.arguments as Watchable; 
             SinkMessenger.startWatching(SerialMetadata.fromWatchable(watchable, 0, 0));
