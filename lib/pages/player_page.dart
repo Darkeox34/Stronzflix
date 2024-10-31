@@ -116,7 +116,7 @@ class _PlayerPageState extends State<PlayerPage> with StreamListener {
                                 : CastManager.connected
                                     ? (context) => const CastVideoView()
                                 : null,
-                            controller: this._controller,
+                            controller: this._controller!,
                         );
                     }
                 )
