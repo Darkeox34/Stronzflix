@@ -17,15 +17,8 @@ class FloatingPlayerContext extends StatefulWidget {
 
     static Widget navigatorGuard(BuildContext context, {required Widget child}) {
         if (FloatingPlayerContext.of(context).visible)
-            return AlertDialog(
-                title: const Text("Attenzione"),
-                content: const Text("Un video è già in riproduzione"),
-                actions: [
-                    TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text("Chiudi")
-                    )
-                ]
+            WidgetsBinding.instance.addPostFrameCallback(
+                (_) => FloatingPlayerContext.of(context).close()
             );
         return child;
     }
@@ -60,49 +53,62 @@ class FloatingPlayerContextState extends State<FloatingPlayerContext> {
         });
     }
 
+    void close() {
+        this._onClose?.call();
+        this._onClose = null;
+        this._onExpand = null;
+        this._buildContent = null;
+        super.setState(() => this._visible = false);
+    }
+
+    Widget _buildTopGradient(BuildContext context) {
+        return Container(
+            decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: [
+                        0.0,
+                        0.2,
+                    ],
+                    colors: [
+                        Color(0x61000000),
+                        Color(0x00000000),
+                    ],
+                )
+            )
+        );
+    }
+
+    Widget _buildBottomGradient(BuildContext context) {
+        return Container(
+            decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: [
+                        0.5,
+                        1.0,
+                    ],
+                    colors: [
+                        Color(0x00000000),
+                        Color(0x61000000),
+                    ],
+                )
+            )
+        );
+    }
+
     Widget _buildControls(BuildContext context) {
         return Stack(
             children: [
-                Container(
-                    decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            stops: [
-                                0.0,
-                                0.2,
-                            ],
-                            colors: [
-                                Color(0x61000000),
-                                Color(0x00000000),
-                            ],
-                        )
-                    )
-                ),
-                Container(
-                    decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            stops: [
-                                0.5,
-                                1.0,
-                            ],
-                            colors: [
-                                Color(0x00000000),
-                                Color(0x61000000),
-                            ],
-                        )
-                    )
-                ),
+                this._buildTopGradient(context),
+                this._buildBottomGradient(context),
                 Align(
                     alignment: Alignment.topRight,
                     child: IconButton(
                         icon: const Icon(Icons.close),
-                        onPressed: () {
-                            this._onClose?.call();
-                            super.setState(() => this._visible = false);
-                        },
+                        onPressed: this.close,
                     ),
                 ),
                 Align(
