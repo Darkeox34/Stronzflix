@@ -14,6 +14,14 @@ import 'package:stronzflix/components/resource_image.dart';
 import 'package:stronzflix/components/save_title_button.dart';
 import 'package:stronzflix/dialogs/confirmation_dialog.dart';
 import 'package:stronzflix/dialogs/download_dialog.dart';
+import 'package:stronzflix/pages/player_page.dart';
+
+class TitlePageArguments {
+    final String heroUuid;
+    final TitleMetadata metadata;
+    
+    const TitlePageArguments(this.heroUuid, this.metadata);
+}
 
 class TitlePage extends StatefulWidget {
     final String heroUuid;
@@ -224,7 +232,7 @@ class _TitlePageState extends State<TitlePage> {
                         ? Icons.fast_forward
                         : Icons.play_arrow,
                         borderPercentage: progress ?? 0.0,
-                        action: () => Navigator.pushNamed(context, '/player', arguments: this.title)
+                        action: () => Navigator.pushNamed(context, '/player', arguments: PlayerPageArguments(this.title as Film))
                     ),
                     if(this.title.site.isLocal)
                         buildActionIcon(context, Icons.delete_outline,

@@ -5,6 +5,7 @@ import 'package:stronzflix/backend/storage/keep_watching.dart';
 import 'package:stronzflix/components/border_text.dart';
 import 'package:stronzflix/components/resource_image.dart';
 import 'package:stronzflix/dialogs/download_dialog.dart';
+import 'package:stronzflix/pages/player_page.dart';
 import 'package:stronzflix/pages/title_page.dart';
 
 class EpisodeCard extends StatelessWidget {
@@ -115,7 +116,7 @@ class EpisodeCard extends StatelessWidget {
                         skipTraversal: false,
                         descendantsAreTraversable: false,
                     ),
-                    onTap: () => Navigator.pushNamed(context, '/player', arguments: this.episode),
+                    onTap: () => Navigator.pushNamed(context, '/player', arguments: PlayerPageArguments(this.episode)),
                     child: Padding(
                         padding: const EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0, bottom: 8.0),
                         child: Column(
@@ -131,29 +132,4 @@ class EpisodeCard extends StatelessWidget {
             )
         );
     }
-
-    // void _play(BuildContext context) {
-    //     Navigator.pushNamed(context, '/player', arguments: this.episode);
-    // }
-
-    // void _action(BuildContext context) {
-    //     if(this.episode.site.isLocal)
-    //         this._delete(context, this.episode);
-    //     else    
-    //         this._download(context, this.episode);
-    // }
-
-    // Future<void> _download(BuildContext context, Watchable watchable) async {
-    //     await DownloadDialog.open(context, watchable);
-    // }
-
-    // Future<void> _delete(BuildContext context, Watchable watchable) async {
-    //     bool delete = await ConfirmationDialog.ask(context,
-    //         "Elimina ${watchable.title}",
-    //         "Sei sicuro di voler eliminare ${watchable.title}?",
-    //         action: "Elimina"
-    //     );
-    //     if (delete)
-    //         await DownloadManager.deleteSingle(watchable);
-    // }
 }

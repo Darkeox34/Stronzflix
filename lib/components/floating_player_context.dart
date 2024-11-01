@@ -47,13 +47,15 @@ class FloatingPlayerContextState extends State<FloatingPlayerContext> {
 
     Widget Function(BuildContext)? _buildContent;
     void Function()? _onClose;
+    void Function()? _onExpand;
     
     bool get visible => this._visible;
 
-    void show(Widget Function(BuildContext)? buildContent, {void Function()? onClose}) {
+    void show(Widget Function(BuildContext)? buildContent, {void Function()? onClose, void Function()? onExpand}) {
         super.setState(() {
             this._buildContent = buildContent;
             this._onClose = onClose;
+            this._onExpand = onExpand;
             this._visible = true;
         });
     }
@@ -104,6 +106,16 @@ class FloatingPlayerContextState extends State<FloatingPlayerContext> {
                     ),
                 ),
                 Align(
+                    alignment: Alignment.topLeft,
+                    child: IconButton(
+                        icon: const Icon(Icons.fullscreen),
+                        onPressed: () {
+                            this._onExpand?.call();
+                            super.setState(() => this._visible = false);
+                        },
+                    ),
+                ),
+                Align(
                     alignment: Alignment.bottomLeft,
                     child: GestureDetector(
                         onPanStart: (_) => super.setState(() => this._resizing = true),
@@ -147,6 +159,7 @@ class FloatingPlayerContextState extends State<FloatingPlayerContext> {
                         width: this._size.width,
                         height: this._size.height,
                         decoration: BoxDecoration(
+                            color: Colors.black,
                             boxShadow: [
                                 BoxShadow(
                                     color: Colors.black.withValues(alpha: 0.5),

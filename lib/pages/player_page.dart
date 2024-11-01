@@ -12,13 +12,25 @@ import 'package:stronzflix/components/player/cast_video_view.dart';
 import 'package:stronzflix/components/player/chat_button.dart';
 import 'package:stronzflix/components/player/floating_player_button.dart';
 import 'package:stronzflix/components/player/peer_external_controller.dart';
+import 'package:stronzflix/stronzflix.dart';
 import 'package:sutils/sutils.dart';
+
+class PlayerPageArguments {
+    final Watchable watchable;
+    final StronzPlayerController? controller;
+
+    const PlayerPageArguments(this.watchable, {
+        this.controller,
+    });
+}
 
 class PlayerPage extends StatefulWidget {
     final Watchable watchable;
+    final StronzPlayerController? controller;
 
     const PlayerPage({
-        required this.watchable,    
+        required this.watchable,   
+        this.controller, 
         super.key,
     });
 
@@ -31,7 +43,7 @@ class _PlayerPageState extends State<PlayerPage> with StreamListener {
     bool _exited = false;
     bool _floatingPlayerVisible = false;
 
-    StronzPlayerController? _controller;
+    late StronzPlayerController? _controller = super.widget.controller;
 
     @override
     void didChangeDependencies() {
@@ -108,6 +120,11 @@ class _PlayerPageState extends State<PlayerPage> with StreamListener {
                                     onOpen: () {
                                         this._floatingPlayerVisible = true;
                                         Navigator.of(context).pop();
+                                    },
+                                    onExpand: () {
+                                        Stronzflix.navigatorKey.currentState!.pushNamed('/player',
+                                            arguments: PlayerPageArguments(super.widget.watchable, controller: this._controller)
+                                        );
                                     },
                                 )
                             ],

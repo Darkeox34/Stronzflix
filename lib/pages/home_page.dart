@@ -23,6 +23,7 @@ import 'package:stronzflix/components/card_grid.dart';
 import 'package:stronzflix/dialogs/loading_dialog.dart';
 import 'package:stronzflix/dialogs/settings_dialog.dart';
 import 'package:stronzflix/dialogs/sink_dialog.dart';
+import 'package:stronzflix/pages/player_page.dart';
 import 'package:stronzflix/pages/search_page.dart';
 import 'package:sutils/sutils.dart';
 
@@ -51,7 +52,7 @@ class _HomePageState extends State<HomePage> {
                     return await Watchable.unserialize(metadata.metadata, metadata.info);
                 }).then((watchable) {
                     if(super.mounted)
-                        Navigator.of(super.context).pushNamed('/player-sink', arguments: watchable);
+                        Navigator.pushNamed(super.context, '/player-sink', arguments: PlayerPageArguments(watchable));
                 });
         });
 

@@ -5,6 +5,8 @@ import 'package:stronzflix/backend/api/media.dart';
 import 'package:stronzflix/backend/storage/keep_watching.dart';
 import 'package:stronzflix/components/resource_image.dart';
 import 'package:stronzflix/dialogs/loading_dialog.dart';
+import 'package:stronzflix/pages/player_page.dart';
+import 'package:stronzflix/pages/title_page.dart';
 import 'package:uuid/uuid.dart';
 
 class TitleCard extends StatefulWidget {
@@ -153,7 +155,7 @@ class _TitleCardState extends State<TitleCard> {
     }
 
     void _open(BuildContext context) {
-        Navigator.pushNamed(context, '/title', arguments: [ this._uuid, super.widget.title ]);
+        Navigator.pushNamed(context, '/title', arguments: TitlePageArguments(this._uuid, super.widget.title!));
     }
 
     void _play(BuildContext context) {
@@ -183,7 +185,7 @@ class _TitleCardState extends State<TitleCard> {
                 title is Series ? title.seasons.first.episodes.first
                 : title is Film ? title
                 : throw Exception("Unknown title type");
-            Navigator.pushNamed(context, '/player', arguments: watchable);
+            Navigator.pushNamed(context, '/player', arguments: PlayerPageArguments(watchable));
         });
     }
 
@@ -192,7 +194,7 @@ class _TitleCardState extends State<TitleCard> {
         .then((watchable) {
             if(!context.mounted)
                 return;
-            Navigator.pushNamed(context, '/player', arguments: watchable);
+            Navigator.pushNamed(context, '/player', arguments: PlayerPageArguments(watchable!));
         });
     }
 }
