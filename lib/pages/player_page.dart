@@ -114,8 +114,10 @@ class _PlayerPageState extends State<PlayerPage> with StreamListener {
                                 FloatingPlayerButton(
                                     onClose: () {
                                         this._floatingPlayerVisible = false;
-                                        if(this._exited)
+                                        if(this._exited && this._controller != null) {
+                                            KeepWatching.add(this._controller!.playable as Watchable, this._controller!.position.inSeconds, this._controller!.duration.inSeconds);
                                             this._controller?.dispose();
+                                        }
                                     },
                                     onOpen: () {
                                         this._floatingPlayerVisible = true;
