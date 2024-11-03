@@ -128,18 +128,19 @@ class FloatingPlayerContextState extends State<FloatingPlayerContext> {
                         onPanEnd: (_) => super.setState(() => this._resizing = false),
                         onPanUpdate: (details) {
                             super.setState(() {
-                                double aspectRatio = this._size.width / this._size.height;
+                                double aspectRatio = this._size.aspectRatio;
 
-                                double newWidth = this._size.width - details.delta.dx;
+                                double delta = details.delta.dx;
+                                if(this._position.dx + delta < this._padding)
+                                    delta = this._padding - this._position.dx;
 
-                                double clampedWidth = newWidth.clamp(this._minSize.width, double.infinity);
-                                double clampedHeight = clampedWidth / aspectRatio;
+                                double newWidth = this._size.width - delta;
+                                newWidth = newWidth.clamp(this._minSize.width, double.infinity);
+                                double newHeight = newWidth / aspectRatio;
 
-                                double widthDelta = this._size.width - clampedWidth;
-
-                                this._size = Size(clampedWidth, clampedHeight);
+                                this._size = Size(newWidth, newHeight);
                                 this._position = Offset(
-                                    this._position.dx + widthDelta,
+                                    this._position.dx + delta,
                                     this._position.dy
                                 );
                             });
