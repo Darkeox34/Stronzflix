@@ -39,6 +39,10 @@ class FloatingPlayerButton extends StatelessWidget with StronzPlayerControl {
         if(EPlatform.isTV)
             return const SizedBox.shrink();
 
+        // TODO: remove upon proper support
+        if(!EPlatform.isDesktop)
+            return const SizedBox.shrink();
+
         return IconButton(
             icon: const Icon(Icons.picture_in_picture_alt_rounded),
             iconSize: this.iconSize,
