@@ -28,6 +28,7 @@ class FloatingPlayerContextState extends State<FloatingPlayerContext> {
 
     Offset _position = const Offset(100.0, 100.0);
     Offset _initialPosition = const Offset(100.0, 100.0);
+    late Size _initialSize = this._size;
     Offset _dragOffset = Offset.zero;
 
     Size _size = const Size(16 * 20, 9 * 20);
@@ -126,22 +127,30 @@ class FloatingPlayerContextState extends State<FloatingPlayerContext> {
                     child: GestureDetector(
                         onPanStart: (_) => super.setState(() => this._resizing = true),
                         onPanEnd: (_) => super.setState(() => this._resizing = false),
+                        onPanDown: (details) {
+                            this._initialSize = this._size;
+                            this._initialPosition = this._position;
+                        },
                         onPanUpdate: (details) {
                             super.setState(() {
-                                double aspectRatio = this._size.aspectRatio;
+                                double aspectRatio = this._initialSize.aspectRatio;
+                                Size screenSize = MediaQuery.of(context).size;
+                                double delta = details.localPosition.dx;
 
-                                double delta = details.delta.dx;
-                                if(this._position.dx + delta < this._padding)
-                                    delta = this._padding - this._position.dx;
+                                if (this._initialPosition.dx + delta < this._padding)
+                                    delta = this._padding - this._initialPosition.dx;
 
-                                double newWidth = this._size.width - delta;
-                                newWidth = newWidth.clamp(this._minSize.width, double.infinity);
+                                double newWidth = this._initialSize.width - delta;
                                 double newHeight = newWidth / aspectRatio;
+
+                                newHeight = newHeight.clamp(this._minSize.height, screenSize.height - this._position.dy - this._padding);
+                                newWidth = (newHeight * aspectRatio).clamp(this._minSize.width, double.infinity);
+                                newHeight = newWidth / aspectRatio;
 
                                 this._size = Size(newWidth, newHeight);
                                 this._position = Offset(
-                                    this._position.dx + delta,
-                                    this._position.dy
+                                    this._initialPosition.dx + (this._initialSize.width - newWidth),
+                                    this._position.dy,
                                 );
                             });
                         },
