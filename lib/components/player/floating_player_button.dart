@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:stronz_video_player/components/video_player_view.dart';
 import 'package:stronz_video_player/stronz_video_player.dart';
 import 'package:stronzflix/components/floating_player_context.dart';
-import 'package:sutils/utils/expanded_platform.dart';
+import 'package:sutils/sutils.dart';
 
 class FloatingPlayerButton extends StatelessWidget with StronzPlayerControl {
     final double iconSize;
@@ -20,6 +20,9 @@ class FloatingPlayerButton extends StatelessWidget with StronzPlayerControl {
     });
 
     void _showFloatingPlayer(BuildContext context) {
+        if(FullScreen.checkSync())
+            FullScreen.set(false);
+
         StronzPlayerController controller = super.controller(context, listen: false);
         FloatingPlayerContext.of(context).show(
             (_) => Provider<StronzPlayerController>.value(
