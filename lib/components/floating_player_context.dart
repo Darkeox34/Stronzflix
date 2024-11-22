@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:sutils/sutils.dart';
 
 class FloatingPlayerContext extends StatefulWidget {
     final Widget? child;
@@ -42,6 +45,8 @@ class FloatingPlayerContextState extends State<FloatingPlayerContext> {
     Widget Function(BuildContext)? _buildContent;
     void Function()? _onClose;
     void Function()? _onExpand;
+
+    Timer? _timer;
     
     bool get visible => this._visible;
 
@@ -106,14 +111,14 @@ class FloatingPlayerContextState extends State<FloatingPlayerContext> {
                 this._buildTopGradient(context),
                 this._buildBottomGradient(context),
                 Align(
-                    alignment: Alignment.topRight,
+                    alignment: Alignment.topLeft,
                     child: IconButton(
                         icon: const Icon(Icons.close),
                         onPressed: this.close,
                     ),
                 ),
                 Align(
-                    alignment: Alignment.topLeft,
+                    alignment: Alignment.topRight,
                     child: IconButton(
                         icon: const Icon(Icons.fullscreen),
                         onPressed: () {
@@ -122,46 +127,46 @@ class FloatingPlayerContextState extends State<FloatingPlayerContext> {
                         },
                     ),
                 ),
-                Align(
-                    alignment: Alignment.bottomLeft,
-                    child: GestureDetector(
-                        onPanStart: (_) => super.setState(() => this._resizing = true),
-                        onPanEnd: (_) => super.setState(() => this._resizing = false),
-                        onPanDown: (details) {
-                            this._initialSize = this._size;
-                            this._initialPosition = this._position;
-                        },
-                        onPanUpdate: (details) {
-                            super.setState(() {
-                                double aspectRatio = this._initialSize.aspectRatio;
-                                Size screenSize = MediaQuery.of(context).size;
-                                double delta = details.localPosition.dx;
+                if(EPlatform.isDesktop)
+                    Align(
+                        alignment: Alignment.bottomLeft,
+                        child: GestureDetector(
+                            onPanStart: (_) => super.setState(() => this._resizing = true),
+                            onPanEnd: (_) => super.setState(() => this._resizing = false),
+                            onPanDown: (details) {
+                                this._initialSize = this._size;
+                                this._initialPosition = this._position;
+                            },
+                            onPanUpdate: (details) {
+                                super.setState(() {
+                                    double delta = details.localPosition.dx;
 
-                                if (this._initialPosition.dx + delta < this._padding)
-                                    delta = this._padding - this._initialPosition.dx;
+                                    if (this._initialPosition.dx + delta < this._padding)
+                                        delta = this._padding - this._initialPosition.dx;
 
-                                double newWidth = this._initialSize.width - delta;
-                                double newHeight = newWidth / aspectRatio;
-
-                                newHeight = newHeight.clamp(this._minSize.height, screenSize.height - this._position.dy - this._padding);
-                                newWidth = (newHeight * aspectRatio).clamp(this._minSize.width, double.infinity);
-                                newHeight = newWidth / aspectRatio;
-
-                                this._size = Size(newWidth, newHeight);
-                                this._position = Offset(
-                                    this._initialPosition.dx + (this._initialSize.width - newWidth),
-                                    this._position.dy,
-                                );
-                            });
-                        },
-                        child: const Icon(
-                            Icons.drag_handle
-                        )
+                                    this._resize(this._initialSize.width - delta);
+                                    this._moveTo(
+                                        this._initialPosition.dx + (this._initialSize.width - this._size.width),
+                                        this._position.dy
+                                    );
+                                });
+                            },
+                            child: const MouseRegion(
+                                cursor: SystemMouseCursors.resizeUpRightDownLeft,
+                                child: Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Icon(
+                                        Icons.drag_handle,
+                                    ),
+                                )
+                            )
+                        ),
                     ),
-                ),
             ],
         );
     }
+
+    bool _panning = false;
 
     Widget _buildFloatintPlayer(BuildContext context) {
         return Positioned(
@@ -171,6 +176,39 @@ class FloatingPlayerContextState extends State<FloatingPlayerContext> {
                 onEnter: (_) => super.setState(() => this._showControls = true),
                 onExit: (_) => super.setState(() => this._showControls = this._resizing || false),
                 child: GestureDetector(
+                    onTap: this._restartTimer,
+                    onScaleStart: (details) {
+                        if(details.pointerCount == 1) {
+                            this._dragOffset = details.localFocalPoint;
+                            this._initialPosition = this._position;
+                            this._panning = true;
+                        } else if (details.pointerCount == 2) {
+                            this._initialSize = this._size;
+                            this._initialPosition = this._position;
+                            this._resizing = true;
+                        }
+                    },
+                    onScaleEnd: (_) {
+                        this._panning = false;
+                        this._resizing = false;
+                    },
+                    onScaleUpdate: (details) {
+                        if(this._panning)
+                            super.setState(() {
+                                this._moveTo(
+                                    this._initialPosition.dx + details.localFocalPoint.dx - this._dragOffset.dx,
+                                    this._initialPosition.dy + details.localFocalPoint.dy - this._dragOffset.dy
+                                );
+                            });
+                        else
+                            super.setState(() {
+                                this._resize(this._initialSize.width * details.scale);
+                                this._moveTo(
+                                    this._initialPosition.dx - (this._size.width) / 2 + details.localFocalPoint.dx,
+                                    this._initialPosition.dy - (this._size.height) / 2 + details.localFocalPoint.dy
+                                );
+                            });
+                    },
                     child: Container(
                         width: this._size.width,
                         height: this._size.height,
@@ -191,33 +229,12 @@ class FloatingPlayerContextState extends State<FloatingPlayerContext> {
                             child: Stack(
                                 children: [
                                     this._buildContent!.call(context),
-                                    if (this._showControls)
+                                    if (this._showControls || this._resizing)
                                         this._buildControls(context)
                                 ],
                             ),
                         ),
-                    ),
-                    onPanDown: (details) {
-                        this._dragOffset = details.localPosition;
-                        this._initialPosition = this._position;
-                    },
-                    onPanUpdate: (details) {
-                        super.setState(() {
-                            Offset newPosition = Offset(
-                                this._initialPosition.dx + details.localPosition.dx - this._dragOffset.dx,
-                                this._initialPosition.dy + details.localPosition.dy - this._dragOffset.dy
-                            );
-
-                            Size screenSize = MediaQuery.of(context).size;
-                            double maxX = screenSize.width - this._size.width - this._padding;
-                            double maxY = screenSize.height - this._size.height - this._padding;
-
-                            this._position = Offset(
-                                newPosition.dx.clamp(this._padding, maxX),
-                                newPosition.dy.clamp(this._padding, maxY)
-                            );
-                        });
-                    },
+                    )
                 )
             )
         );
@@ -229,9 +246,42 @@ class FloatingPlayerContextState extends State<FloatingPlayerContext> {
             children: [
                 if(super.widget.child != null)
                     super.widget.child!,
-                if(this._visible)
+                if(this.visible)
                     this._buildFloatintPlayer(context)
             ],
         );
+    }
+
+    void _moveTo(double x, double y) {
+        Size screenSize = MediaQuery.of(context).size;
+        double maxX = screenSize.width - this._size.width - this._padding;
+        double maxY = screenSize.height - this._size.height - this._padding;
+
+        this._position = Offset(
+            x.clamp(this._padding, maxX),
+            y.clamp(this._padding, maxY)
+        );
+    }
+
+    void _resize(double width) {
+        double aspectRatio = this._initialSize.aspectRatio;
+        Size screenSize = MediaQuery.of(context).size;
+
+        width = width.clamp(this._minSize.width, screenSize.width - this._position.dx - this._padding);
+
+        double height = width / aspectRatio;
+        height = height.clamp(this._minSize.height, screenSize.height - this._position.dy - this._padding);
+        
+        width = (height * aspectRatio).clamp(this._minSize.width, double.infinity);
+
+        this._size = Size(width, height);
+    }
+
+    void _restartTimer() {
+        this._timer?.cancel();
+        super.setState(() => this._showControls = !this._showControls);
+        this._timer = Timer(const Duration(seconds: 3), () {
+            super.setState(() => this._showControls = false);
+        });
     }
 }
