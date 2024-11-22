@@ -29,18 +29,19 @@ class FloatingPlayerContext extends StatefulWidget {
 
 class FloatingPlayerContextState extends State<FloatingPlayerContext> {
 
-    Offset _position = const Offset(100.0, 100.0);
-    Offset _initialPosition = const Offset(100.0, 100.0);
+    late Offset _position;
+    late Offset _initialPosition;
     late Size _initialSize = this._size;
     Offset _dragOffset = Offset.zero;
 
-    Size _size = const Size(16 * 20, 9 * 20);
     final Size _minSize = const Size(16 * 10, 9 * 10);
+    late Size _size = this._minSize;
     final double _padding = 20.0;
 
     bool _visible = false;
     bool _showControls = false;
     bool _resizing = false;
+    bool _panning = false;
 
     Widget Function(BuildContext)? _buildContent;
     void Function()? _onClose;
@@ -52,6 +53,19 @@ class FloatingPlayerContextState extends State<FloatingPlayerContext> {
 
     void show(Widget Function(BuildContext)? buildContent, {void Function()? onClose, void Function()? onExpand}) {
         super.setState(() {
+            final screenSize = MediaQuery.of(context).size;
+            final isMobile = EPlatform.isMobile;
+
+            final double xPos = isMobile 
+                ? screenSize.height - this._size.width - this._padding 
+                : screenSize.width - this._size.width - this._padding;
+
+            final double yPos = isMobile 
+                ? screenSize.width - this._size.height - this._padding 
+                : screenSize.height - this._size.height - this._padding;
+
+            this._position = Offset(xPos, yPos);
+
             this._buildContent = buildContent;
             this._onClose = onClose;
             this._onExpand = onExpand;
@@ -165,8 +179,6 @@ class FloatingPlayerContextState extends State<FloatingPlayerContext> {
             ],
         );
     }
-
-    bool _panning = false;
 
     Widget _buildFloatintPlayer(BuildContext context) {
         return Positioned(
