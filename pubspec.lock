@@ -367,10 +367,10 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "77b34dd2aa9d9ce6afc46d49748e0c2c9b51931a"
+      resolved-ref: "85178be45075211049548f523f325718bbdfafe1"
       url: "https://github.com/Bonfra04/fvp.git"
     source: git
-    version: "0.27.0"
+    version: "0.28.0"
   html:
     dependency: "direct main"
     description:
