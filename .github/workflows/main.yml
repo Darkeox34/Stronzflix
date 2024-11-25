@@ -146,9 +146,9 @@ jobs:
           cp ffmpeg/bin/ffmpeg build/linux/x64/release/bundle
           cp ffmpeg/LICENSE.txt build/linux/x64/release/bundle/ffmpeg_LICENSE.txt
 
-      - name: Zip File
+      - name: Build AppImage
         run: |
-          cd build/linux/x64/release; zip -r ../../../../build.zip bundle; cd -
+          ./linux/appimage/generate_appimage.sh
 
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
@@ -156,9 +156,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_path: ./build.zip
-          asset_name: Stronzflix Linux - amd64.zip
-          asset_content_type: application/zip
+          asset_path: ./build/linux/x64/release/Stronzflix.AppImage
+          asset_name: Stronzflix Linux - amd64.AppImage
+          asset_content_type: application/octet-stream
 
   build_macos:
     name: Build MacOS
