@@ -20,7 +20,7 @@ abstract class Updater {
         else if(Platform.isWindows)
             platform = ".msi";
         else if(Platform.isLinux)
-            platform = "Linux";
+            platform = ".AppImage";
         else if(Platform.isMacOS)
             platform = "MacOS";
         else
