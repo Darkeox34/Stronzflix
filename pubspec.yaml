@@ -49,6 +49,8 @@ dependency_overrides:
     git:
       url: https://github.com/flutter/packages.git
       path: ./packages/video_player/video_player
+  fvp:
+    git: https://github.com/Bonfra04/fvp.git
 
 dev_dependencies:
   flutter_test:

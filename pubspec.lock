@@ -363,7 +363,7 @@ packages:
     source: hosted
     version: "0.9.48+hotfix.1"
   fvp:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       path: "."
       ref: HEAD
