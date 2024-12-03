@@ -9,5 +9,5 @@
         ".flutter-plugins": true,
         ".flutter-plugins-dependencies": true,
     },
-    "dart.flutterSdkPath": "D:\\flutter",
+    "cmake.ignoreCMakeListsMissing": true,
 }

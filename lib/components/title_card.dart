@@ -25,7 +25,7 @@ class TitleCard extends StatefulWidget {
 
 class _TitleCardState extends State<TitleCard> {
     final String _uuid = const Uuid().v4();
-
+    bool _isHovered = false;
     TitleMetadata get _title => super.widget.title!;
 
     Widget _buildButton(BuildContext context, {
@@ -106,53 +106,80 @@ class _TitleCardState extends State<TitleCard> {
         );
     }
 
-    @override
-    Widget build(BuildContext context) {
-        if(super.widget.title == null)
-            return AspectRatio(
-                aspectRatio: 16 / 9,
-                child: Shimmer.fromColors(
-                    baseColor: Theme.of(context).colorScheme.surface,
-                    highlightColor: Theme.of(context).scaffoldBackgroundColor,
-                    period: const Duration(milliseconds: 2500),
-                    child: const Card(
-                        child: SizedBox.expand(),
-                    )
-                )
-            );
-        return AspectRatio(
-            aspectRatio: 16 / 9, 
-            child: Card(
-                child: InkWell(
-                    focusNode: FocusNode(
-                        skipTraversal: false,
-                        descendantsAreTraversable: false,
+@override
+Widget build(BuildContext context) {
+  if (super.widget.title == null) {
+    return AspectRatio(
+      aspectRatio: 16 / 9,
+      child: Shimmer.fromColors(
+        baseColor: Theme.of(context).colorScheme.surface,
+        highlightColor: Theme.of(context).scaffoldBackgroundColor,
+        period: const Duration(milliseconds: 2500),
+        child: const Card(
+          child: SizedBox.expand(),
+        ),
+      ),
+    );
+  }
+
+  return MouseRegion(
+    onEnter: (_) => setState(() {
+      _isHovered = true;
+    }),
+    onExit: (_) => setState(() {
+      _isHovered = false;
+    }),
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      width: _isHovered ? 350 : 135, // Espansione laterale su hover
+      height: 450, // Altezza costante
+      child: Card(
+        elevation: _isHovered ? 10 : 2,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Immagine (sempre visibile)
+            Hero(
+              tag: _uuid,
+              child: ResourceImage(
+                uri: _title.poster,
+                fit: BoxFit.contain,
+              ),
+            ),
+            // Contenuto che appare su hover
+            AnimatedOpacity(
+              opacity: _isHovered ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 200),
+              child: Visibility(
+                visible: _isHovered,
+                child: Flexible(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        AutoSizeText(
+                          _title.name,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        _buildActions(context), // Pulsanti o icone interattive
+                      ],
                     ),
-                    onTap: () => this._open(context),
-                    child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: IntrinsicHeight(
-                            child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                    Hero(
-                                        tag: this._uuid,
-                                        child: ResourceImage(
-                                            uri: this._title.poster
-                                        )
-                                    ),
-                                    const SizedBox(width: 16),
-                                    Flexible(
-                                        child: this._buildSection(context)
-                                    )
-                                ]
-                            )
-                        )
-                    )
-                )
-            )
-        );
-    }
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
 
     void _open(BuildContext context) {
         Navigator.pushNamed(context, '/title', arguments: TitlePageArguments(this._uuid, super.widget.title!));
